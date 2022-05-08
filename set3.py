@@ -1,5 +1,9 @@
 import cv2
-  
+import time
+import random
+
+
+
    
 # Create an object to read 
 # from camera
@@ -20,17 +24,21 @@ size = (frame_width, frame_height)
 # Below VideoWriter object will create
 # a frame of above defined The output 
 # is stored in 'filename.avi' file.
+current_time = time.time()
+
 result = cv2.VideoWriter('filename.avi', 
                          cv2.VideoWriter_fourcc(*'MJPG'),
                          10, size)
-    
+vid_key = 0    
 while(True):
     ret, frame = video.read()
-  
+    updated_time = time.time()
     if ret == True: 
   
         # Write the frame into the
         # file 'filename.avi'
+
+
         result.write(frame)
   
         # Display the frame

@@ -2,18 +2,46 @@
 # import libraries of python OpenCV
 import cv2
 import os
+import time
 
 # load the required trained XML classifiers
-face_cascade = cv2.CascadeClassifier('/home/charles/Documents/Y4 Project/haarcascade_frontalface_default.xml')
+face_cascade = cv2.CascadeClassifier('haarcascade_frontalface_default.xml')
 # capture frames from a camera
 cap = cv2.VideoCapture(0)
 
+frame_width = int(cap.get(3))
+frame_height = int(cap.get(4))
+   
+size = (frame_width, frame_height)
+
+if (cap.isOpened() == False): 
+    print("Error reading video file")
+
 # loop runs if capturing has been initialized.
+
+
+result = cv2.VideoWriter('videodatabase/filename.avi', 
+                         cv2.VideoWriter_fourcc(*'MJPG'),
+                         10, size)
+
+current_time = time.time()
+vid_key = 0
 while True:
+
 
 	# reads frames from a camera
 	ret, img = cap.read()
-
+	updated_time = time.time()
+	local_time = time.ctime(updated_time)
+	if ret == True: 
+		if updated_time - current_time > 10:
+			current_time = updated_time
+			new_date =str(local_time).replace(":", "-")
+			filename = 'videodatabase/video_time_int/'+'Camera_rec '+new_date
+			result = cv2.VideoWriter(filename+'.avi', 
+							cv2.VideoWriter_fourcc(*'MJPG'),
+							10, size)
+		result.write(img)
 	# convert to gray scale of each frames
 	gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
@@ -40,22 +68,6 @@ while True:
 
 # Close the window
 cap.release()
+result.release()
 
-
-#convert size to integer.
-frame_width = int(cap.get(3))
-frame_height = int(cap.get(4))
-
-size = (frame_width, frame_height)
-
-# Below VideoWriter object will create
-# a frame of above defined The output 
-# is stored in 'filename.avi' file.
-result = cv2.VideoWriter('/home/charles/Documents/Y4 Project/video1.mp4', 
-                         cv2.VideoWriter_fourcc(*'mp4v'),
-                         10, size)
-
-result.write(gray)
-
-# De-allocate any associated memory usage
 cv2.destroyAllWindows()
