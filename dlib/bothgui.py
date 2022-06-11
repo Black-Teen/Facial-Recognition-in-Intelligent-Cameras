@@ -12,7 +12,9 @@ import pyautogui
 import numpy as np
 import face_recognition
 import os
-
+import smtplib
+import time
+import email
 
 
 known_face_encodings = [
@@ -21,6 +23,8 @@ known_face_encodings = [
 known_face_names = [
 
 ]
+
+unknown_faces = []
 
 cap = cv2. VideoCapture ( 0 , cv2.CAP_DSHOW )
 
@@ -156,8 +160,83 @@ def easy_detection ( frame ) :
             if matches[best_match_index]:
                 name = known_face_names[best_match_index]
             else:
-                print(name)
+                img_item = "unknownface.png"
+                cv2.imwrite(img_item,frame)
+                def sendmail(imname):
+                    ################# SMTP SSL ################################
+                    start = time.time()
+                    try:
+                        smtp_ssl = smtplib.SMTP_SSL(host="smtp.mail.yahoo.com", port=465)
+                    except Exception as e:
+                        print("ErrorType : {}, Error : {}".format(type(e).__name__, e))
+                        smtp_ssl = None
 
+                    print("Connection Object : {}".format(smtp_ssl))
+                    print("Total Time Taken  : {:,.2f} Seconds".format(time.time() - start))
+
+                    ######### Log In to mail account ############################
+                    print("\nLogging In.....")
+                    resp_code, response = smtp_ssl.login(user="juanpombe@yahoo.com", password="giioypwrjesqekon")
+
+                    print("Response Code : {}".format(resp_code))
+                    print("Response      : {}".format(response.decode()))
+
+                    ################ Send Mail ########################
+                    print("\nSending Mail..........")
+
+                    message = email.message.EmailMessage()
+
+                    message["From"] = "juanpombe@yahoo.com"
+                    message["To"] = ["kagwepeter07@gmail.com", ]
+                    message["cc"] = ["pkagwe07.2309@gmail.com",]
+                    message["Bcc"] = ["kariukipeter46@yahoo.com", ]
+
+                    message["Subject"] =  "Mail with attachments"
+
+                    body = '''
+                    Hello All,
+
+                    Please find attached file.
+
+                    Regards,
+                    CoderzColumn
+                    '''
+                    message.set_content(body)
+
+                    ### Attach JPEG Image.
+                    with open(imname, mode="rb") as fp:
+                        img_content = fp.read()
+                        message.add_attachment(img_content, maintype="image", subtype="jpeg", filename="kalam.jpeg")
+
+                    ### Send Message
+                    response = smtp_ssl.send_message(msg=message)
+
+                    print("List of Failed Recipients : {}".format(response))
+
+                    ######### Log out to mail account ############################
+                    print("\nLogging Out....")
+                    resp_code, response = smtp_ssl.quit()
+
+                    print("Response Code : {}".format(resp_code))
+                    print("Response      : {}".format(response.decode()))
+
+                if len(unknown_faces) == 0:
+
+                    unknown_faces.append(face_encoding)
+                    print("Intruder Detected");
+                    sendmail(img_item)
+
+                else:
+                    matches1 = face_recognition.compare_faces(unknown_faces, face_encoding)
+                    face_distances1 = face_recognition.face_distance(unknown_faces, face_encoding)
+                    best_match_index1 = np.argmin(face_distances1)
+                    if matches1[best_match_index1]:
+                        print("Reported")
+                    else:
+                        unknown_faces.append(face_encoding)
+                        print("Intruder Detected");
+                        sendmail(img_item)
+                                                              
             face_names.append(name)
 
     
@@ -289,9 +368,9 @@ btnUser = Button ( root, text= "Add user" , width= 20 , command=adduser )
 btnUser. grid ( column= 2 , row= 2  , pady=20, padx =10 )
 
 
-lblInfoVideoPath = Label ( root, text= "" , width= 20 )
+lblInfoVideoPath = Label ( root, text= "" , width= 20,)
 lblInfoVideoPath. grid ( column= 0 , row= 3 )
-lblVideo = Label ( root )
+lblVideo = Label ( root , borderwidth=5, relief="ridge")
 lblVideo. grid ( column= 0 , row= 4 , columnspan= 2 )
 buttScreen = Button ( root, text= "Take screen shot" ,width= 20 , state= "disabled" , command=takeScreenShot )
 buttScreen . grid ( column= 0 , row= 5  ,  padx =10 )
