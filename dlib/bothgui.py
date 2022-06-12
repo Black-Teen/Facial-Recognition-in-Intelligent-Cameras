@@ -15,7 +15,11 @@ import os
 import smtplib
 import time
 import email
+from twilio.rest import Client
+import tkinter.messagebox
 
+newim_no = 0
+newuserpath= " "
 
 known_face_encodings = [
 
@@ -220,6 +224,19 @@ def easy_detection ( frame ) :
                     print("Response Code : {}".format(resp_code))
                     print("Response      : {}".format(response.decode()))
 
+                    account_sid = os.environ['TWILIO_ACCOUNT_SID'] = 'AC6258d8972ac6c28e95d07a0c18fe6506'
+                    auth_token = os.environ['TWILIO_AUTH_TOKEN'] = '5b9edd6bba20d167ae34617b47bf9fd1'
+                    client = Client(account_sid, auth_token)
+
+                    message = client.messages \
+                        .create(
+                             body='Please check your email, an intruder has been detected',
+                             from_='+19895107791',
+                             to='+254707801908'
+                         )
+
+                    print(message.sid)
+
                 if len(unknown_faces) == 0:
 
                     unknown_faces.append(face_encoding)
@@ -285,10 +302,14 @@ def adduser():
                 ( "all video format" , ".avi" )])
             if len ( path_video ) > 0 :   
                 buttScreens.configure ( state= "active" )
+                buttCreateuser.configure ( state= "active" )
                 rad1. configure ( state= "disabled" )
                 rad2. configure ( state= "disabled" )
+                pathInputVideo = "..." + path_video [ -20 : ]
+                cap = cv2. VideoCapture ( path_video )
         if selected.get()== 4 :
             buttScreens.configure ( state= "active" )
+            buttCreateuser.configure ( state= "active" )
             rad1. configure ( state= "disabled" )
             rad2. configure ( state= "disabled" )
             cap=video_cap
@@ -297,8 +318,11 @@ def adduser():
         
     def openCamera():
          global cap
+         global framez
+         
          if cap is not None:
              ret, frame1 = cap.read()
+             framez = frame1
              if ret == True:
                 frame1 = imutils.resize(frame1, width=640)
                 frame1 = cv2.cvtColor(frame1, cv2.COLOR_BGR2RGB)
@@ -310,7 +334,35 @@ def adduser():
              else:
                 lblVideo1.image = ""
                 cap.release()
-     
+    def get_folder_name():
+        global newuserpath
+        name1=e1.get()
+        name2=e2.get()
+        folder_name = name1+ "-" + name2
+        cwd = os.getcwd()
+        path = os.path.join(cwd ,"Faces")
+        createfolder =os.path.join(path,folder_name)
+
+        if not os.path.exists(createfolder):
+            os.mkdir(createfolder)
+            tkinter.messagebox.showinfo("Done.",  "Crated new user  " + folder_name + "   Please take screenshots of the user profile picture")
+            newuserpath=createfolder
+        else:
+            tkinter.messagebox.showinfo("Try again.",  "A user with that named " + folder_name +  "already exists!")
+            print("A user with that name already exists!")
+        
+
+    def takeUserScreenShot():
+        global newim_no
+        imname= "image"+str(newim_no)+".png"
+        if newuserpath != " ":
+            path = newuserpath
+            cv2.imwrite(os.path.join(path , imname), framez)
+            newim_no +=1
+        else:
+            tkinter.messagebox.showinfo("Try again",  "No new user created")
+        
+         
     # Toplevel object which will
     # be treated as a new window
     newWindow = Toplevel(root)
@@ -338,15 +390,18 @@ def adduser():
     e1.grid(row=3, column=1)
     e2.grid(row=4, column=1)
 
-    rad3 = Radiobutton ( newWindow, text= "Upload Photos" , width= 40 , value= 3 , variable=selected, command=input_Image )
+    buttCreateuser = Button ( newWindow, text= "Register user" ,width= 20 , state= "disabled" , command=get_folder_name )
+    buttCreateuser.grid ( column= 1 , row= 5  ,  padx =10 )
+
+    rad3 = Radiobutton ( newWindow, text= "Take screenshots from video" , width= 40 , value= 3 , variable=selected, command=input_Image )
     rad4 = Radiobutton ( newWindow, text= "Take screnshots from camera" , width= 40 , value= 4 , variable=selected, command=input_Image )
-    rad3. grid ( column= 0 , row= 5 , pady=10, padx =20)
-    rad4. grid ( column= 1 , row= 5, pady=10, padx =20 )
+    rad3. grid ( column= 0 , row= 6 , pady=10, padx =20)
+    rad4. grid ( column= 1 , row= 6, pady=10, padx =20 )
 
     lblVideo1 = Label ( newWindow )
-    lblVideo1. grid ( column= 0 , row= 6 , columnspan= 2 )
-    buttScreens = Button ( newWindow, text= "Take screen shot" ,width= 20 , state= "disabled" , command=takeScreenShot )
-    buttScreens . grid ( column= 0 , row= 7  ,  padx =10 )
+    lblVideo1. grid ( column= 0 , row= 7 , columnspan= 2 )
+    buttScreens = Button ( newWindow, text= "Take screen shot" ,width= 20 , state= "disabled" , command=takeUserScreenShot )
+    buttScreens . grid ( column= 0 , row= 8  ,  padx =10 )
 
 cap = None
 root = Tk ()
