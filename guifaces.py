@@ -104,6 +104,7 @@ def display () :
 
 
 def easy_detection ( frame ) :
+    print("reached")
     gray = cv2. cvtColor ( frame, cv2.COLOR_BGR2GRAY )
     
     faces = face_cascade. detectMultiScale ( gray, 1.3 , 5 )
@@ -122,8 +123,7 @@ def easy_detection ( frame ) :
             color = (255,255,255)
             stroke = 2
             cv2.putText(frame,name,(x,y),font,1,color,stroke,cv2.LINE_AA)
-            img_item = "my_image.png"
-            cv2.imwrite(img_item,roi_gray)
+
 
 	    #eyes=eye_classifier.detectMultiScale(roi_gray)
 
