@@ -180,7 +180,7 @@ def easy_detection ( frame ) :
 
                     ######### Log In to mail account ############################
                     print("\nLogging In.....")
-                    resp_code, response = smtp_ssl.login(user="juanpombe@yahoo.com", password="giioypwrjesqekon")
+                    resp_code, response = smtp_ssl.login(user="juanpombe@yahoo.com", password="xxxxxxxxxxxxxxxxxx")
 
                     print("Response Code : {}".format(resp_code))
                     print("Response      : {}".format(response.decode()))
@@ -224,8 +224,8 @@ def easy_detection ( frame ) :
                     print("Response Code : {}".format(resp_code))
                     print("Response      : {}".format(response.decode()))
 
-                    account_sid = os.environ['TWILIO_ACCOUNT_SID'] = 'AC6258d8972ac6c28e95d07a0c18fe6506'
-                    auth_token = os.environ['TWILIO_AUTH_TOKEN'] = '5b9edd6bba20d167ae34617b47bf9fd1'
+                    account_sid = os.environ['TWILIO_ACCOUNT_SID'] = 'xxxxxxxxxxxxxxxxxxxxxxxxxxx'
+                    auth_token = os.environ['TWILIO_AUTH_TOKEN'] = 'xxxxxxxxxxxxxxxxxxxxxxxxxxxx'
                     client = Client(account_sid, auth_token)
 
                     message = client.messages \
